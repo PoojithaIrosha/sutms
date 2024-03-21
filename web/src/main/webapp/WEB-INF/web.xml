@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0">
+
+    <context-param>
+        <param-name>jsp-inheritance-prefix</param-name>
+        <param-value>/WEB-INF/views/layouts/</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>jsp-inheritance-suffix</param-name>
+        <param-value>.jsp</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>com.poojithairosha.web.listener.ContextListener</listener-class>
+    </listener>
+
+    <filter>
+        <filter-name>JerseyFilter</filter-name>
+        <filter-class>org.glassfish.jersey.servlet.ServletContainer</filter-class>
+        <init-param>
+            <param-name>jakarta.ws.rs.Application</param-name>
+            <param-value>com.poojithairosha.web.config.AppConfig</param-value>
+        </init-param>
+        <init-param>
+            <param-name>jersey.config.servlet.filter.forwardOn404</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>JerseyFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+</web-app>
