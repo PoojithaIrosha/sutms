@@ -1,25 +1,17 @@
 package com.poojithairosha.web.service;
 
-import com.poojithairosha.core.model.DeviceData;
 import com.poojithairosha.core.model.TrafficLightLocation;
 import com.poojithairosha.core.util.DecimalFormatter;
-import com.poojithairosha.core.util.HibernateUtil;
+import com.poojithairosha.ejb.remote.IoTDeviceData;
+import com.poojithairosha.ejb.remote.TrafficPatternAnalyzer;
 import com.poojithairosha.ejb.remote.VehicleSpeedCalculator;
 import com.poojithairosha.web.dto.AvgSpeedDTO;
 import jakarta.inject.Singleton;
-import jakarta.persistence.criteria.Predicate;
-import org.hibernate.Session;
-import org.hibernate.query.criteria.HibernateCriteriaBuilder;
-import org.hibernate.query.criteria.JpaCriteriaQuery;
-import org.hibernate.query.criteria.JpaRoot;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Singleton
 public class VehicleDataService {
@@ -75,71 +67,22 @@ public class VehicleDataService {
         return CALCULATORS.get(location.name());
     }
 
-    public Map<String, Object> getDataPagination(int page, String date) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            session.beginTransaction();
-
-            List<Predicate> predicatesList = new ArrayList<>();
-            List<Predicate> countPredicatesList = new ArrayList<>();
-
-            HibernateCriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-            JpaCriteriaQuery<DeviceData> query = criteriaBuilder.createQuery(DeviceData.class);
-            JpaRoot<DeviceData> root = query.from(DeviceData.class);
-
-            JpaCriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
-            JpaRoot<DeviceData> countRoot = countQuery.from(DeviceData.class);
-
-            if(date != null) {
-                LocalDate localDate = LocalDate.parse(date);
-                Timestamp startOfDay = Timestamp.valueOf(localDate.atStartOfDay());
-                Timestamp endOfDay = Timestamp.valueOf(localDate.atTime(LocalTime.MAX));
-
-                predicatesList.add(criteriaBuilder.greaterThanOrEqualTo(root.get("captureTime"), startOfDay));
-                predicatesList.add(criteriaBuilder.lessThanOrEqualTo(root.get("captureTime"), endOfDay));
-
-                countPredicatesList.add(criteriaBuilder.greaterThanOrEqualTo(countRoot.get("captureTime"), startOfDay));
-                countPredicatesList.add(criteriaBuilder.lessThanOrEqualTo(countRoot.get("captureTime"), endOfDay));
-            }
-
-            int pageCount = 0;
-            int limit = 200;
-            Long count = null;
-
-            if (predicatesList.isEmpty()) {
-                countQuery.select(criteriaBuilder.count(countRoot));
-                count = session.createQuery(countQuery).uniqueResult();
-                pageCount = (int) Math.ceil((double) count / limit);
-            } else {
-                countQuery.select(criteriaBuilder.count(countRoot)).where(criteriaBuilder.and(countPredicatesList.toArray(new Predicate[0])));
-                count = session.createQuery(countQuery).uniqueResult();
-                pageCount = (int) Math.ceil((double) count / limit);
-            }
-
-            List<DeviceData> deviceDataList = null;
-
-            if (predicatesList.isEmpty()) {
-                deviceDataList = session.createQuery(query.select(root))
-                        .setFirstResult((page > 0 ? page - 1 : 0) * limit)
-                        .setMaxResults(limit)
-                        .getResultList();
-            } else {
-                query.select(root).where(criteriaBuilder.and(predicatesList.toArray(new Predicate[0])));
-                deviceDataList = session.createQuery(query)
-                        .setFirstResult((page > 0 ? page - 1 : 0) * limit)
-                        .setMaxResults(limit)
-                        .getResultList();
-            }
-            session.getTransaction().commit();
-
-            Map<String, Object> result = new HashMap<>();
-            result.put("count", pageCount);
-            result.put("deviceDataList", deviceDataList);
-            result.put("page", page);
-            result.put("date", date);
-
-            return result;
+    public Map<String, Object> getDataPagination(int page, String date, String location) {
+        try {
+            IoTDeviceData deviceDataBean = (IoTDeviceData) CONTEXT.lookup("java:global/SUTMS/com.poojithairosha-ejb-1.0/IoTDeviceDataBean");
+            return deviceDataBean.findDeviceDataPaginate(page, date, location);
+        } catch (NamingException e) {
+            throw new RuntimeException(e);
         }
     }
 
+    public Map<TrafficLightLocation, Map<Integer, Integer>> analyzeTrafficPatterns(String date) {
+        try {
+            TrafficPatternAnalyzer patternAnalyzer = (TrafficPatternAnalyzer) CONTEXT.lookup("java:global/SUTMS/com.poojithairosha-ejb-1.0/TrafficPatternAnalyzerBean");
+            return patternAnalyzer.analyze(date);
+        }catch (NamingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

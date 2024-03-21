@@ -115,5 +115,57 @@ function calculateAvgSpeed(location, speed) {
         }
     };
     req.send();
+}
 
+function changeDate() {
+    const dateInput = document.getElementById("dateInput");
+    const newDate = dateInput.value;
+
+    const baseUrl = window.location.origin + window.location.pathname;
+
+    const currentSearchParams = new URLSearchParams(window.location.search);
+    if (currentSearchParams.has('date')) {
+        currentSearchParams.set('date', newDate);
+    } else {
+        currentSearchParams.append('date', newDate);
+    }
+
+    const updatedUrl = `${baseUrl}?${currentSearchParams.toString()}`;
+
+    window.location.href = updatedUrl;
+}
+
+function changeLocation() {
+    const locationInput = document.getElementById("locationSelect");
+    const newLocation = locationInput.value;
+
+    const baseUrl = window.location.origin + window.location.pathname;
+
+    const currentSearchParams = new URLSearchParams(window.location.search);
+
+    if (newLocation !== "0") {
+        if (currentSearchParams.has('location')) {
+            currentSearchParams.set('location', newLocation);
+        } else {
+            currentSearchParams.append('location', newLocation);
+        }
+    } else {
+        currentSearchParams.delete('location');
+    }
+
+    const updatedUrl = `${baseUrl}?${currentSearchParams.toString()}`;
+
+    window.location.href = updatedUrl;
+
+}
+
+function patternAnalyze(contextPath) {
+    const baseUrl = window.location.origin + contextPath
+    let date = document.getElementById("dateInput").value;
+
+    if(date == "") {
+        alert("Please select a date");
+    }
+
+    window.location.href = baseUrl + "/traffic-patterns/" + date;
 }

@@ -8,6 +8,9 @@
                 <div class="col-12 ">
                     <h1 class="fw-bold text-center">Smart Urban Traffic Management System</h1>
                 </div>
+                <div class="col-12">
+                    <a href="${BASE_URL}/analysis-report" class="btn btn-primary">Analysis Report</a>
+                </div>
             </div>
             <div class="row my-5">
                 <div class="col-12 col-md-6 d-flex align-items-center gap-3">
