@@ -1,25 +1,15 @@
 package com.poojithairosha.web.controller;
 
-import com.google.gson.JsonObject;
-import com.poojithairosha.core.model.DeviceData;
-import com.poojithairosha.core.model.GPSCoordinates;
 import com.poojithairosha.core.model.TrafficLightLocation;
-import com.poojithairosha.core.util.HibernateUtil;
 import com.poojithairosha.web.service.VehicleDataService;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
-import jakarta.persistence.Id;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.glassfish.jersey.server.mvc.Viewable;
-import org.hibernate.Session;
 
-import javax.print.attribute.standard.Media;
-import java.sql.Timestamp;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Map;
 
 @Path("/")
 public class MainController {
@@ -55,12 +45,5 @@ public class MainController {
         Map<TrafficLightLocation, Map<Integer, Integer>> analyzedTrafficPatterns = vehicleDataService.analyzeTrafficPatterns(date);
         return new Viewable("/frontend/traffic-patterns.jsp", analyzedTrafficPatterns);
     }
-
-//    @GET
-//    @Path("/busy-hours/{date}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response test(@PathParam("date") String date) {
-//        return Response.ok().build();
-//    }
 
 }

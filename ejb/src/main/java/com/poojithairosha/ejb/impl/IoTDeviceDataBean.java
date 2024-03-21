@@ -57,7 +57,6 @@ public class IoTDeviceDataBean implements IoTDeviceData {
             HibernateCriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
             JpaCriteriaQuery<DeviceData> query = criteriaBuilder.createQuery(DeviceData.class);
 
-            // Join DeviceData and GPSCoordinates tables
             Root<DeviceData> deviceRoot = query.from(DeviceData.class);
             Join<DeviceData, GPSCoordinates> gpsCoordinateJoin = deviceRoot.join(
                     "gpsCoordinates", JoinType.INNER); // Use INNER JOIN for filtering
